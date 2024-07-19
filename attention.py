@@ -55,4 +55,23 @@ class MultiHeadedAttention(nn.Module):
         self.linears = clones(nn.Linear(embedding_dim, embedding_dim), 4)
         self.attn = None
         self.dropout = dropout
-    def forward(self):
+    def forward(self, query, key, value, mask=None):
+        # 如果存在mask，需要将mask扩展维度，代表多头的第n个头，需要在batch_size后面添加维度
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+        batch_size = query.size(0)
+
+        # 首先利用zip将输入的QKV和linear组合到一起，在分别取出
+        # 使用view方法将tensor的d_model拆分为头数head和每个头分到的特征维度d_k，-1代表每个句子的单词数量
+        # 因为attention使用的是倒数第1个维度和倒数第2个维度，且倒数第一个维度需要表示d_model,倒数第2个维度需要表示单词数量
+        # 所以将第1维度和第2维度调换位置，目的是使单词数和每个头的特征维度更靠近，这样调用attention时才会找到单词之间的关系
+        query, key, value = \
+            [model(x).view(batch_size, -1, self.head, self.d_k).transpose(1, 2) for model, x in zip(self.linears, (query, key, value))]
+        x, self.attn = attention(query, key, value, mask=mask, dropout=self.dropout)
+
+        # 因为此时得到的x是4维的，所以需要合并head维度和d_k维度
+        # 因为这里需要先进行transpose方法，再进行view方法，所以中间需要插入contiguous，否则transpose后无法进行view
+        x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.head * self.d_k)
+
+        # 拼接后再进行一次线性层
+        return self.linears[-1](x)
