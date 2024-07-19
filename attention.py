@@ -41,3 +41,6 @@ def attention(query, key, value, mask=None, dropout=None):
 def clones(module, N):
     """将module深度拷贝N份放入ModuleList中"""
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
+
+
+#
