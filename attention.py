@@ -1,7 +1,6 @@
 import torch
-import torch.nn as nn
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 from torch.autograd import Variable
 import math
 import matplotlib.pyplot as plt
@@ -43,4 +42,17 @@ def clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
 
 
-#
+class MultiHeadedAttention(nn.Module):
+    def __init__(self, head, embedding_dim, dropout=0.1):
+        super(MultiHeadedAttention, self).__init__()
+        # 因为要均匀分配，所以先做一个诊断
+        assert embedding_dim % head == 0
+        # 得到每个头的词特征维度的数量
+        self.d_k = embedding_dim // head
+        self.head = head
+        # 因为多头注意力一共有4个不相关的线形层，分别为K,Q,V的线性层和拼接之后的线性层，所以复制5次。
+        # 因为线性层之后不改变tensor形状，所以输入和输出都是词嵌入维度
+        self.linears = clones(nn.Linear(embedding_dim, embedding_dim), 4)
+        self.attn = None
+        self.dropout = dropout
+    def forward(self):
