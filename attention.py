@@ -54,7 +54,7 @@ class MultiHeadedAttention(nn.Module):
         # 因为线性层之后不改变tensor形状，所以输入和输出都是词嵌入维度
         self.linears = clones(nn.Linear(embedding_dim, embedding_dim), 4)
         self.attn = None
-        self.dropout = dropout
+        self.dropout = nn.Dropout(p=dropout)
     def forward(self, query, key, value, mask=None):
         # 如果存在mask，需要将mask扩展维度，代表多头的第n个头，需要在batch_size后面添加维度
         if mask is not None:

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import copy
 
-from attention import attention
+from attention import attention, MultiHeadedAttention
 from input import Embeddings, subsequent_mask
 
 """test embedding"""
@@ -22,8 +22,18 @@ emb_result = emb(x)
 
 """test attention"""
 query = key = value = emb_result
-print(x.size())
+# print(x.size())
 mask = subsequent_mask(x.size(1))
 # mask = torch.zeros(2, 4, 4)
 att_result = attention(query, key, value, mask)
-print(att_result)
+# print(att_result)
+
+"""test MulitheadedAttention"""
+head = 8
+embedding_dim = 512
+dropout = 0.1
+query = key = value = emb_result
+mask = torch.zeros(2, 4, 4)
+mulit_att = MultiHeadedAttention(head, embedding_dim, dropout)
+mulit_att_result = mulit_att(query, key, value, mask)
+print(mulit_att_result)
