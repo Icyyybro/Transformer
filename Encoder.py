@@ -1,16 +1,10 @@
-import torch
-import torch.nn.functional as F
 from torch import nn
-from torch.autograd import Variable
-import math
-import matplotlib.pyplot as plt
-import numpy as np
-import copy
-
+from LayerNorm import LayerNorm
 from SublayerConnection import SublayerConnection
 from attention import clones
 
-"""编码器"""
+
+"""EncoderLayer"""
 class EncoderLayer(nn.Module):
     def __init__(self, size, self_attn, feed_forward, dropout):
         # size: 词嵌入维度
@@ -27,3 +21,16 @@ class EncoderLayer(nn.Module):
         x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, mask))
         x = self.sublayer[1](x, self.feed_forward)
         return x
+
+
+"""Encoder"""
+class Encoder(nn.Module):
+    def __init__(self, layer, N):
+        super(Encoder, self).__init__()
+        self.layers = clones(layer, N)
+        self.norm = LayerNorm(layer.size)
+
+    def forward(self, x, mask):
+        for layer in self.layers:
+            x = layer(x, mask)
+        return self.norm(x)
