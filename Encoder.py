@@ -15,6 +15,7 @@ class EncoderLayer(nn.Module):
         self.feed_forward = feed_forward
         self.dropout = nn.Dropout(p=dropout)
         self.sublayer = clones(SublayerConnection(size, dropout), 2)
+        self.size = size
 
     def forward(self, x, mask):
         # lambda x: 表示一个需要输入x的函数，这个函数作为参数传入sublayer中，等到sublayer调用forward函数并传入参数时会计算出结果。
