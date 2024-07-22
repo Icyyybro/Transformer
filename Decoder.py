@@ -14,6 +14,7 @@ class DecoderLayer(nn.Module):
         self.feed_forward = feed_forward
         self.dropout = nn.Dropout(p=dropout)
         self.sublayer = clones(SublayerConnection(size, dropout), 3)
+        self.self_attn = self_attn
 
     def forward(self, x, memory, source_mask, target_mask):
         # memory为编码器的输出，大小为batch_size * len * d_model

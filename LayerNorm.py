@@ -12,6 +12,7 @@ class LayerNorm(nn.Module):
         # 这两个参数是可训练的
         self.a2 = nn.Parameter(torch.ones(features))
         self.b2 = nn.Parameter(torch.zeros(features))
+        self.eps = eps
 
     def forward(self, x):
         mean = x.mean(dim=-1, keepdim=True)

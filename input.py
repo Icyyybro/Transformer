@@ -23,7 +23,7 @@ class Embeddings(nn.Module):
 
 
 
-# 位置编码
+"""位置编码"""
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, dropout, max_len=5000):
         super(PositionalEncoding, self).__init__()
@@ -41,12 +41,15 @@ class PositionalEncoding(nn.Module):
         pe[:, 1::2] = torch.cos(position * div_term)
         # 在0维度扩展，变成batch_size * 句子长度 * d_model
         pe = pe.unsqueeze(0)
+        pe = pe.requires_grad_(False)
         self.register_buffer('pe', pe)
 
     def forward(self, x):
         # x: 文本序列词嵌入表示
         # pe的编码太长了， 将第二个维度，也就是maxlen的维度，缩小成句子长度
-        x = x + Variable(self.pe[:, :x.size(1)], requires_grad=False)
+        pos = self.pe[:, :x.size(-2)]
+        x = x + pos
+        return x
 
 
 # 掩码张量函数
@@ -58,3 +61,6 @@ def subsequent_mask(size):
 
     # 反转上三角矩阵，并将numpy转换为tensor
     return torch.from_numpy(1 - subsequent_mask)
+
+
+
